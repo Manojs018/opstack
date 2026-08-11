@@ -1,0 +1,934 @@
+{
+	"info": {
+		"_postman_id": "erp-crm-api-collection-v1",
+		"name": "Mini ERP + CRM API Collection",
+		"description": "Comprehensive Postman collection for Mini ERP + CRM Backend API. Includes authentication pre-request scripts, sample request payloads, query parameters, and endpoints for Auth, Dashboard, Customers, Products, Sales Challans, Invoices, Purchase Orders, Stock Movements, and CRM Follow-ups.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('authToken', jsonData.token);",
+									"    console.log('authToken updated successfully!');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@company.com\",\n  \"password\": \"AdminPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in with email and password to receive JWT bearer token. Token is automatically saved to {{authToken}} collection variable."
+					}
+				},
+				{
+					"name": "Login (Sales Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('authToken', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"sales@company.com\",\n  \"password\": \"SalesPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Register New User (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newuser@company.com\",\n  \"name\": \"New Team Member\",\n  \"password\": \"Password123!\",\n  \"role\": \"SALES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Current User Profile (/me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Metrics & Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/dashboard/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"stats"
+							]
+						},
+						"description": "Fetches aggregated stats: Low stock count, active CRM accounts, pending POs, unpaid invoices, pending followups, and recent dispatches."
+					}
+				}
+			]
+		},
+		{
+			"name": "Customers (CRM)",
+			"item": [
+				{
+					"name": "List Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers?search=&type=&status=&page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Customer by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"David Clark\",\n  \"companyName\": \"Vanguard Logistics\",\n  \"phone\": \"+1 555-0999\",\n  \"email\": \"dclark@vanguardlog.com\",\n  \"billingAddress\": \"500 Cargo Way, Oakland, CA\",\n  \"shippingAddress\": \"500 Cargo Way, Pier 3, Oakland, CA\",\n  \"gstin\": \"36DDDDD4444D4Z8\",\n  \"customerType\": \"DISTRIBUTOR\",\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Logistics and freight distribution partner.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Updated payment terms to Net 45 days.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"4"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Products (Inventory)",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products?search=&category=&lowStock=false&page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "category",
+									"value": ""
+								},
+								{
+									"key": "lowStock",
+									"value": "false"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"SKU-ELEC-006\",\n  \"name\": \"4K USB-C Web Camera\",\n  \"category\": \"Electronics\",\n  \"unit\": \"pcs\",\n  \"price\": 129.00,\n  \"reorderLevel\": 15,\n  \"currentStock\": 45,\n  \"location\": \"Aisle 2 - Shelf C3\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 119.00,\n  \"reorderLevel\": 20\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"5"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Sales Challans (Dispatches)",
+			"item": [
+				{
+					"name": "List Sales Challans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-challans?status=&search=&customerId=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sales-challans"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "customerId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Sales Challan by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-challans/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sales-challans",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Sales Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": 1,\n  \"challanDate\": \"2026-08-11T00:00:00.000Z\",\n  \"status\": \"CONFIRMED\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 5,\n      \"unitPrice\": 35.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-challans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sales-challans"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Challan Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"DISPATCHED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-challans/3/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sales-challans",
+								"3",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Generate Invoice from Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dueDate\": \"2026-09-15T00:00:00.000Z\",\n  \"taxRate\": 18\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sales-challans/2/invoice",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sales-challans",
+								"2",
+								"invoice"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Invoices & Billing",
+			"item": [
+				{
+					"name": "List Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoices?paymentStatus=&search=&customerId=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoices"
+							],
+							"query": [
+								{
+									"key": "paymentStatus",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "customerId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Invoice by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoices/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Payment Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentStatus\": \"PAID\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/invoices/3/payment",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"3",
+								"payment"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Purchase Orders (Procurement)",
+			"item": [
+				{
+					"name": "List Purchase Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders?status=&search=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase-orders"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Purchase Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase-orders",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Purchase Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"supplierName\": \"Quantum Components Inc\",\n  \"poDate\": \"2026-08-11T00:00:00.000Z\",\n  \"items\": [\n    {\n      \"productId\": 2,\n      \"quantity\": 15,\n      \"unitCost\": 175.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase-orders"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update PO Status (Stock Intake on RECEIVED)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"RECEIVED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/purchase-orders/2/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"purchase-orders",
+								"2",
+								"status"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Stock Movements (Audit Log)",
+			"item": [
+				{
+					"name": "List Stock Movements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/stock-movements?productId=&type=&limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"stock-movements"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": ""
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Manual Stock Adjustment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 3,\n  \"quantity\": 10,\n  \"type\": \"IN\",\n  \"reason\": \"Inventory audit physical count discrepancy fix\",\n  \"notes\": \"Verified by Warehouse Lead Dave Miller\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/stock-movements",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"stock-movements"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "CRM Follow-ups",
+			"item": [
+				{
+					"name": "List Follow-ups",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/followups?status=&type=&assignedToId=&customerId=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"followups"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": ""
+								},
+								{
+									"key": "assignedToId",
+									"value": ""
+								},
+								{
+									"key": "customerId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Follow-up Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": 1,\n  \"type\": \"CALL\",\n  \"dueDate\": \"2026-08-20T10:00:00.000Z\",\n  \"notes\": \"Follow up on bulk order proposal for Q4\",\n  \"assignedToId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/followups",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"followups"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Follow-up Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"DONE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/followups/1/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"followups",
+								"1",
+								"status"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

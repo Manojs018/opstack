@@ -1,0 +1,227 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum POStatus {
+  DRAFT
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+enum FollowupType {
+  CALL
+  EMAIL
+  VISIT
+}
+
+enum FollowupStatus {
+  PENDING
+  DONE
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  followups       Followup[]
+  stockMovements  StockMovement[]
+  salesChallans   SalesChallan[]
+}
+
+model Customer {
+  id              Int            @id @default(autoincrement())
+  name            String
+  companyName     String
+  phone           String
+  email           String
+  billingAddress  String
+  shippingAddress String
+  gstin           String?
+  notes           String?
+  customerType    CustomerType   @default(RETAIL)
+  status          CustomerStatus @default(LEAD)
+  followUpDate    DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  salesChallans   SalesChallan[]
+  invoices        Invoice[]
+  followups       Followup[]
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  sku          String   @unique
+  name         String
+  category     String
+  unit         String   // pcs, kg, box, etc.
+  price        Float
+  reorderLevel Int
+  currentStock Int      @default(0)
+  location     String?  // Warehouse / shelf location
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  stockMovements    StockMovement[]
+  poItems           PurchaseOrderItem[]
+  challanItems      SalesChallanItem[]
+  invoiceItems      InvoiceItem[]
+}
+
+model StockMovement {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  quantity      Int      // Positive for stock-in, negative for stock-out
+  type          String   // IN, OUT
+  referenceId   Int?     // ID of the PO or SalesChallan
+  referenceType String?  // PO, CHALLAN, MANUAL
+  notes         String?
+  reason        String?  // Human-readable reason for manual adjustments
+  createdById   Int?     // User who created this movement
+  createdAt     DateTime @default(now())
+
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdBy     User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model PurchaseOrder {
+  id           Int                 @id @default(autoincrement())
+  supplierName String
+  poDate       DateTime
+  status       POStatus            @default(DRAFT)
+  totalAmount  Float               @default(0.0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  items        PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id        Int      @id @default(autoincrement())
+  poId      Int
+  productId Int
+  quantity  Int
+  unitCost  Float
+
+  purchaseOrder PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+}
+
+model SalesChallan {
+  id            Int                @id @default(autoincrement())
+  challanNumber String?            @unique
+  customerId    Int
+  createdById   Int?
+  challanDate   DateTime
+  status        ChallanStatus      @default(DRAFT)
+  totalQuantity Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  customer    Customer           @relation(fields: [customerId], references: [id])
+  createdBy   User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  items       SalesChallanItem[]
+  invoices    Invoice[]
+}
+
+model SalesChallanItem {
+  id          Int      @id @default(autoincrement())
+  challanId   Int
+  productId   Int
+  productName String?
+  sku         String?
+  unit        String?
+  quantity    Int
+  unitPrice   Float
+
+  salesChallan SalesChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id])
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  invoiceNumber String        @unique
+  customerId    Int
+  challanId     Int?
+  subtotal      Float
+  tax           Float
+  total         Float
+  paymentStatus PaymentStatus @default(UNPAID)
+  dueDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  salesChallan  SalesChallan? @relation(fields: [challanId], references: [id], onDelete: SetNull)
+  items         InvoiceItem[]
+}
+
+model InvoiceItem {
+  id        Int      @id @default(autoincrement())
+  invoiceId Int
+  productId Int
+  quantity  Int
+  unitPrice Float
+
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Followup {
+  id           Int            @id @default(autoincrement())
+  customerId   Int
+  type         FollowupType
+  dueDate      DateTime
+  status       FollowupStatus @default(PENDING)
+  notes        String?
+  assignedToId Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  customer     Customer       @relation(fields: [customerId], references: [id])
+  assignedTo   User           @relation(fields: [assignedToId], references: [id])
+}
