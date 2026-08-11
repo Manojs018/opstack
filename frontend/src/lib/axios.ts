@@ -1,17 +1,23 @@
 import axios from 'axios';
 
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+  let url = import.meta.env.VITE_API_BASE_URL;
+  if (!url) {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      url = 'https://opstack-backend.onrender.com/api';
+    } else {
+      url = 'http://localhost:5000/api';
+    }
   }
-  if (
-    typeof window !== 'undefined' &&
-    window.location.hostname !== 'localhost' &&
-    window.location.hostname !== '127.0.0.1'
-  ) {
-    return 'https://opstack-backend.onrender.com/api';
+  url = url.trim();
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
   }
-  return 'http://localhost:5000/api';
+  return url;
 };
 
 const axiosInstance = axios.create({

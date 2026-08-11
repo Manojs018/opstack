@@ -48,7 +48,16 @@ export default function Dashboard() {
     );
   }
 
-  const { counts, recentChallans, recentInvoices, lowStockProducts } = data;
+  const counts = data?.counts || {
+    customers: 0,
+    lowStock: 0,
+    pendingPOs: 0,
+    unpaidInvoices: 0,
+    pendingFollowups: 0,
+  };
+  const recentChallans = data?.recentChallans || [];
+  const recentInvoices = data?.recentInvoices || [];
+  const lowStockProducts = data?.lowStockProducts || [];
 
   const cardConfig = [
     {
