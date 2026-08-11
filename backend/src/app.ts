@@ -14,34 +14,13 @@ import stockMovementsRouter from './routes/stockMovements';
 
 const app = express();
 
-// Flexible CORS Configuration for local & production deployment
-const corsOrigin = process.env.CORS_ORIGIN;
+// Universal CORS configuration for production deployment
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
-
-      if (
-        !corsOrigin ||
-        corsOrigin === '*' ||
-        corsOrigin === origin ||
-        origin.endsWith('.onrender.com') ||
-        origin.includes('localhost') ||
-        origin.includes('127.0.0.1')
-      ) {
-        return callback(null, true);
-      }
-
-      const allowed = corsOrigin.split(',').map((s) => s.trim());
-      if (allowed.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // Default allow to prevent deployment lockout
-      callback(null, true);
-    },
+    origin: true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 

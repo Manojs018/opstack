@@ -25,13 +25,19 @@ axiosInstance.interceptors.request.use(
   (config) => {
     config.baseURL = getApiBaseUrl();
     const token = localStorage.getItem('token');
-    if (token) {
+    
+    if (token && token !== 'undefined' && token !== 'null' && token.trim() !== '') {
       if (config.headers && typeof config.headers.set === 'function') {
         config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers = config.headers || {};
+        (config.headers as any)['Authorization'] = `Bearer ${token}`;
       }
-      config.headers = config.headers || {};
-      (config.headers as any)['Authorization'] = `Bearer ${token}`;
+    } else if (token === 'undefined' || token === 'null') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
+    
     return config;
   },
   (error) => {
