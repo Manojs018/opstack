@@ -26,7 +26,11 @@ axiosInstance.interceptors.request.use(
     config.baseURL = getApiBaseUrl();
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (config.headers && typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      }
+      config.headers = config.headers || {};
+      (config.headers as any)['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
@@ -35,14 +39,15 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Handle 401 globally (logout user if token expired)
+// Handle 401 globally (logout user if token is expired/invalid)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      console.warn('[Auth]: Invalid or expired token. Clearing session.');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      if (!window.location.pathname.endsWith('/login')) {
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
     }
