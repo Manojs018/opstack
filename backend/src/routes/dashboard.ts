@@ -9,12 +9,14 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next) => {
     // 1. Customer Count
     const customerCount = await prisma.customer.count();
 
-    // 2. Low Stock Count
-    // Compare currentStock <= reorderLevel. Using raw sql or standard sql is necessary.
-    const lowStockResult = await prisma.$queryRaw<any[]>`
-      SELECT COUNT(*)::int as count FROM "Product" WHERE "currentStock" <= "reorderLevel"
-    `;
-    const lowStockCount = lowStockResult[0]?.count || 0;
+    // 2. Low Stock Products calculation (ORM safe)
+    const allProducts = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const lowStockList = allProducts.filter((p) => p.currentStock <= p.reorderLevel);
+    const lowStockCount = lowStockList.length;
+    const lowStockProducts = lowStockList.slice(0, 5);
 
     // 3. Pending POs
     const pendingPoCount = await prisma.purchaseOrder.count({
@@ -45,24 +47,19 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next) => {
     const recentChallans = await prisma.salesChallan.findMany({
       take: 5,
       include: {
-        customer: { select: { name: true, companyName: true } }
+        customer: { select: { name: true, companyName: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     // 7. Recent Invoices
     const recentInvoices = await prisma.invoice.findMany({
       take: 5,
       include: {
-        customer: { select: { name: true, companyName: true } }
+        customer: { select: { name: true, companyName: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
-
-    // 8. Low Stock Products list (first 5)
-    const lowStockProducts = await prisma.$queryRaw<any[]>`
-      SELECT * FROM "Product" WHERE "currentStock" <= "reorderLevel" ORDER BY "currentStock" ASC LIMIT 5
-    `;
 
     return res.status(200).json({
       counts: {

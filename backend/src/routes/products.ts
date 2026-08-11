@@ -70,30 +70,13 @@ router.get(
       let total: number;
 
       if (lowStock) {
-        const searchParam = search ? `%${search}%` : null;
-        const searchClause = search
-          ? `AND ("sku" ILIKE $3 OR "name" ILIKE $3 OR "category" ILIKE $3 OR "location" ILIKE $3)`
-          : '';
-
-        const countQuery = searchParam
-          ? prisma.$queryRawUnsafe<any[]>(
-              `SELECT COUNT(*)::int as count FROM "Product" WHERE "currentStock" <= "reorderLevel" ${searchClause}`,
-              searchParam
-            )
-          : prisma.$queryRaw<any[]>`SELECT COUNT(*)::int as count FROM "Product" WHERE "currentStock" <= "reorderLevel"`;
-
-        const dataQuery = searchParam
-          ? prisma.$queryRawUnsafe<any[]>(
-              `SELECT * FROM "Product" WHERE "currentStock" <= "reorderLevel" ${searchClause} ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
-              limit,
-              skip,
-              searchParam
-            )
-          : prisma.$queryRaw<any[]>`SELECT * FROM "Product" WHERE "currentStock" <= "reorderLevel" ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${skip}`;
-
-        const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
-        total = countResult[0]?.count || 0;
-        data = dataResult;
+        const allProducts = await prisma.product.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+        });
+        const filtered = allProducts.filter((p) => p.currentStock <= p.reorderLevel);
+        total = filtered.length;
+        data = filtered.slice(skip, skip + limit);
       } else {
         const [dbData, dbTotal] = await prisma.$transaction([
           prisma.product.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
