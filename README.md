@@ -8,6 +8,13 @@ This repository is built as a monorepo featuring:
 
 ---
 
+## Live Deployment Links
+
+* **Frontend Application**: [https://opstack-frontend.onrender.com](https://opstack-frontend.onrender.com)
+* **Backend API Service**: [https://opstack-backend.onrender.com](https://opstack-backend.onrender.com)
+
+---
+
 ## 1. Credentials (Demo Accounts)
 
 The database seed script sets up one default account for each of the 4 roles:
